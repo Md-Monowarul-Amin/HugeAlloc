@@ -20,11 +20,11 @@ void * next_ret_ptr;
 
 int do_alloc = 1;
 
-void * HugeAlloc(void * size_){
+void * HugeAlloc(void *arg){
 
-    int size = (int )size_;
+    // int size = (int )size_;
 
-    printf("size %d", size); 
+    printf("size %d", 1); 
     
    
         // struct PageAllocation * temp_allocation;
@@ -47,8 +47,6 @@ void * HugeAlloc(void * size_){
 
         // printf("Systemcall jumping time: %f \n", (double)(system_call_jumping_ends - system_call_jumping_starts) );
         current_ret_ptr = current_break;
-
-        next_ret_ptr = current_break + size;
 
         
         // printf("%f", current_break);
@@ -78,7 +76,7 @@ void * alloc(int size){
 
     // int size = (int) size_;
 
-    if (current_AT_index != 0 || do_alloc == 0){
+    if (current_AT_index != 0){
             // printf("Achieved : %ld", (next_ret_ptr + size - current_break));
         if((next_ret_ptr + size - current_break) <= TWO_MB){
             
@@ -89,21 +87,30 @@ void * alloc(int size){
             return current_ret_ptr; 
         }
         else{
-            pthread_t t_id;
-            int thread_attr = size;
-            pthread_create(&t_id, NULL, HugeAlloc, &thread_attr);
+            // pthread_t t_id;
+            // // int thread_attr = size;
+            // pthread_create(&t_id, NULL, HugeAlloc, NULL);
 
-            pthread_join(&t_id, NULL);
-            return current_ret_ptr;
+            // pthread_join(&t_id, NULL);
+            
+            // next_ret_ptr = current_break + size;
+
+            // return current_ret_ptr;
+            printf("Hello");
         }
     }
     else{
-            pthread_t t_id;
-            int thread_attr = size;
-            pthread_create(&t_id, NULL, HugeAlloc, &thread_attr);
+            // pthread_t t_id;
+            // int thread_attr = size;
+            // pthread_create(&t_id, NULL, HugeAlloc, NULL);
 
-            pthread_join(&t_id, NULL);
-            return current_ret_ptr;
+            // pthread_join(&t_id, NULL);
+
+            
+            // next_ret_ptr = current_break + size;
+
+            // return current_ret_ptr;
+            // printf("Hello");
     }
 }
 
@@ -147,28 +154,25 @@ int main(){
     clock_t end_mlk = clock();
 
     printf("time for mlk: %f \n", (double)(end_mlk - start_mlk));
-
-
-
-
-
     // printf("%p", arr);
     
 
-    clock_t start_brk = clock();
+    // clock_t start_brk = clock();
 
 
-    printf("Going");
-    clock_t time_for_allocation_start_brk = clock();
+    // printf("Going %ld", start_brk);
+    // clock_t time_for_allocation_start_brk = clock();
 
     // int * arr = HugeAlloc(brk_size_i * sizeof(int));
-    int * arr = alloc(brk_size_i * sizeof(int));
+    int *arr = (int *) alloc(brk_size_i * sizeof(int));
+    arr[0] = 5;
+    arr[1] = 4;
     // unsigned int thread_attr = brk_size_i * sizeof(int);
 
-    clock_t time_for_allocation_end_brk = clock();
+    // clock_t time_for_allocation_end_brk = clock();
 
 
-    printf("Time for allocation of brk: %ld %i\n", (time_for_allocation_end_brk - time_for_allocation_start_brk), *arr);
+    // printf("Time for allocation of brk: %ld %i\n", (time_for_allocation_end_brk - time_for_allocation_start_brk), *arr);
 
 
     // for(int i=0; i < brk_size_i; i++){
@@ -184,9 +188,9 @@ int main(){
     //     // arr[10000] = 2;
     // }
 
-    clock_t end_brk = clock();
+    // clock_t end_brk = clock();
 
-    printf("time for brk: %f \n", (double)(end_brk - start_brk));
+    // printf("time for brk: %f \n", (double)(end_brk - start_brk));
 
 
 
