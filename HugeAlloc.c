@@ -5,6 +5,7 @@
 // #include "PageAllocation.h"
 #include <time.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #define ONE_MB 1000000
 #define TWO_MB (2 * 1024 * 1000)
@@ -19,9 +20,13 @@ void * next_ret_ptr;
 
 int do_alloc = 1;
 
-void * HugeAlloc(ssize_t size){
+void * HugeAlloc(void * size_){
 
-    if (size >= ONE_MB || current_AT_index == 0 || do_alloc == 1){
+    int size = (int )size_;
+
+    printf("size %d", size); 
+    
+   
         // struct PageAllocation * temp_allocation;
         // allocation_table[current_AT_index] = temp_allocation;
         current_AT_index += 1;
@@ -63,34 +68,58 @@ void * HugeAlloc(ssize_t size){
 
         // temp_allocation -> total_size = size;
 
-        return current_ret_ptr;
-    }
-    else{
+        // return current_ret_ptr;
+        pthread_exit(0);
+    
+
+}
+
+void * alloc(int size){
+
+    // int size = (int) size_;
+
+    if (current_AT_index != 0 || do_alloc == 0){
+            // printf("Achieved : %ld", (next_ret_ptr + size - current_break));
         if((next_ret_ptr + size - current_break) <= TWO_MB){
             
             // printf("Achieved : %ld", (next_ret_ptr + size - current_break));
             current_ret_ptr = next_ret_ptr;
             next_ret_ptr += size;
+            // pthread_exit(current_ret_ptr);
             return current_ret_ptr; 
         }
         else{
-            do_alloc = 1;
-            return HugeAlloc(size);
+            pthread_t t_id;
+            int thread_attr = size;
+            pthread_create(&t_id, NULL, HugeAlloc, &thread_attr);
+
+            pthread_join(&t_id, NULL);
+            return current_ret_ptr;
         }
     }
+    else{
+            pthread_t t_id;
+            int thread_attr = size;
+            pthread_create(&t_id, NULL, HugeAlloc, &thread_attr);
+
+            pthread_join(&t_id, NULL);
+            return current_ret_ptr;
+    }
 }
+
 
 int main(){
 
 
     // struct PageAllocation *temp_huge;
     // temp_huge->total_size = 0;
+    
 
-    int malloc_size_i = 1000000;
-    int malloc_size_j = 700;
+    int malloc_size_i = 10;
+    int malloc_size_j = 7;
 
-    int brk_size_i = 1000000;
-    int brk_size_j = 700;
+    int brk_size_i = 10;
+    int brk_size_j = 7;
 
     clock_t start_mlk = clock();
 
@@ -124,30 +153,36 @@ int main(){
 
 
     // printf("%p", arr);
+    
 
     clock_t start_brk = clock();
 
+
+    printf("Going");
     clock_t time_for_allocation_start_brk = clock();
 
-    int * arr = HugeAlloc(brk_size_i * sizeof(int));
+    // int * arr = HugeAlloc(brk_size_i * sizeof(int));
+    int * arr = alloc(brk_size_i * sizeof(int));
+    // unsigned int thread_attr = brk_size_i * sizeof(int);
 
     clock_t time_for_allocation_end_brk = clock();
 
-    printf("Time for allocation of brk: %ld \n", (time_for_allocation_end_brk - time_for_allocation_start_brk));
+
+    printf("Time for allocation of brk: %ld %i\n", (time_for_allocation_end_brk - time_for_allocation_start_brk), *arr);
 
 
-    for(int i=0; i < brk_size_i; i++){
+    // for(int i=0; i < brk_size_i; i++){
 
-        int * temp_arr =  HugeAlloc(brk_size_j  * sizeof(int));
+    //     int * temp_arr =  HugeAlloc(brk_size_j  * sizeof(int));
 
-        for(int j = 0; j < brk_size_j; j++){
-            temp_arr[j] = 1;
-        }
-        arr[i] = temp_arr;
+    //     for(int j = 0; j < brk_size_j; j++){
+    //         temp_arr[j] = 1;
+    //     }
+    //     arr[i] = temp_arr;
 
-        // int * arr = HugeAlloc(1);
-        // arr[10000] = 2;
-    }
+    //     // int * arr = HugeAlloc(1);
+    //     // arr[10000] = 2;
+    // }
 
     clock_t end_brk = clock();
 
