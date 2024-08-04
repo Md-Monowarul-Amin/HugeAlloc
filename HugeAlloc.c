@@ -12,6 +12,7 @@
 #define PAGE_SIZE TWO_MB
 
 struct PageAllocation * allocation_table[64];
+pthread_mutex_t alloc_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int current_AT_index = 0;
 void * current_ret_ptr; //THe pointer to return
@@ -41,7 +42,11 @@ void * HugeAlloc(void * size_){
 
         // clock_t system_call_jumping_starts = clock();
 
+        pthread_mutex_lock(&alloc_lock);
+
         current_break = sbrk(TWO_MB);   
+
+        pthread_mutex_unlock(&alloc_lock);
 
         // clock_t system_call_jumping_ends = clock();
 
@@ -69,7 +74,7 @@ void * HugeAlloc(void * size_){
         // temp_allocation -> total_size = size;
 
         // return current_ret_ptr;
-        pthread_exit(0);
+        pthread_exit(NULL);
     
 
 }
@@ -77,6 +82,8 @@ void * HugeAlloc(void * size_){
 void * alloc(int size){
 
     // int size = (int) size_;
+
+    pthread_mutex_lock(&alloc_lock);
 
     if (current_AT_index != 0 || do_alloc == 0){
             // printf("Achieved : %ld", (next_ret_ptr + size - current_break));
@@ -100,11 +107,17 @@ void * alloc(int size){
     else{
             pthread_t t_id;
             int thread_attr = size;
+            // pthread_attr_t attr1;
+
+            // pthread_attr_init(&attr1);
+
             pthread_create(&t_id, NULL, HugeAlloc, &thread_attr);
+
 
             pthread_join(&t_id, NULL);
             return current_ret_ptr;
     }
+    pthread_mutex_unlock(&alloc_lock);
 }
 
 
