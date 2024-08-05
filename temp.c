@@ -4,13 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-struct temp
-{
-    /* data */
-};
-
-
-
  
 int main(){
     int n = 10;

@@ -35,6 +35,8 @@ void *my_sbrk(ptrdiff_t size) {
 
 void *my_malloc(size_t size) {
     if(is_first_time ==1 || do_alloc == 1){
+        is_first_time = 0;
+        do_alloc = 0;
 
         void *current_break = my_sbrk(size);
         if (!current_break) {
@@ -47,6 +49,8 @@ void *my_malloc(size_t size) {
     }
     else{
         if((next_ret_addr + size - current_break) < TWO_MB ){
+            
+            do_alloc = 1;
             
             void *current_break = my_sbrk(size);
             if (!current_break) {
