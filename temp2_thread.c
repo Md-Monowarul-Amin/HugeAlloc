@@ -130,7 +130,6 @@ int main() {
         printf("arr[%d] = %d\n", i, arr[i]);
     }
 
-    printf("Current_CPU: %d", )
 
     // Note: my_free() is not implemented because sbrk() does not support freeing memory
     // However, you can use sbrk() to allocate more memory if needed
