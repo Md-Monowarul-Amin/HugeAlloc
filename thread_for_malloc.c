@@ -95,8 +95,16 @@ void *my_malloc(size_t size) {
         current_ret_addr = current_break;
         next_ret_addr = current_ret_addr + size;
         return current_ret_addr;
+
     } else {
-        if ((next_ret_addr + size - current_break) > TWO_MB) {
+        if ((next_ret_addr + size - current_break) <= TWO_MB) {
+
+            current_ret_addr = next_ret_addr;
+            next_ret_addr = next_ret_addr + size;
+            return current_ret_addr;
+
+        } else {
+
             do_alloc = 1;
 
             pthread_mutex_lock(&alloc_lock);
@@ -118,10 +126,7 @@ void *my_malloc(size_t size) {
             current_ret_addr = current_break;
             next_ret_addr = current_ret_addr + size;
             return current_ret_addr;
-        } else {
-            current_ret_addr = next_ret_addr;
-            next_ret_addr = next_ret_addr + size;
-            return current_ret_addr;
+
         }
     }
 }
@@ -136,7 +141,7 @@ int main() {
     printf("Allocating memory using sbrk()\n");
 
     // Create the global sbrk thread
-    pthread_create(&t_id, NULL, my_sbrk, NULL);
+    pthread_create(&t_id, NULL, sbrk, NULL);
 
     
     printf("CPU : %d\n", pthread_getaffinity_np(t_id, sizeof(cpu_set_t), &cpuset));
@@ -150,25 +155,38 @@ int main() {
 
     // Checking time for the first time allocation
     clock_t start_my_malloc = clock();
-    int *arr = (int *)my_malloc(10000 * sizeof(int));
+    int *arr = (int *)my_malloc(1000 * sizeof(int));
     clock_t end_my_malloc = clock();
 
     // Checking time for the second time allocation
     clock_t start_my_malloc2 = clock();
-    int *arr1 = (int *)my_malloc(10 * sizeof(int));
+    int **arr1 = (int **)my_malloc(1000 * sizeof(int));
+    for(int i=0; i< 1000; i++){
+        int *temp_arr = (int *)my_malloc(1000 * sizeof(int));
+        for (int j =0; j<1000; j++){
+            arr1[i][j] = j;
+        }
+    }
+
     clock_t end_my_malloc2 = clock();
 
-    arr1[0] = 5;
+    // arr1[0] = 5;
     printf("Time for my_malloc: %ld\n", (end_my_malloc - start_my_malloc));
     printf("Time for my_malloc2: %ld, %d\n", (end_my_malloc2 - start_my_malloc2), arr1[0]);
 
     clock_t start_malloc = clock();
-    int *arr2 = (int *)malloc(1000 * sizeof(int));
+    int **arr2 = (int **)malloc(1000 * sizeof(int));
+    for(int i=0; i< 1000; i++){
+        int *temp_arr = (int *)malloc(700 * sizeof(int));
+        for (int j =0; j<1000; j++){
+            arr2[i][j] = j;
+        }
+    }    
     clock_t end_malloc = clock();
 
     // Checking time for the second time allocation
     clock_t start_malloc2 = clock();
-    int *arr3 = (int *)malloc(100 * sizeof(int));
+    int *arr3 = (int *)malloc(10 * sizeof(int));
     clock_t end_malloc2 = clock();
 
     arr1[0] = 5;
