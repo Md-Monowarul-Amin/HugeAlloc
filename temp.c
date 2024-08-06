@@ -29,10 +29,10 @@ int main(){
         // struct PageAllocation *temp_huge;
     // temp_huge->total_size = 0;
 
-    int malloc_size_i = 1000000;
+    int malloc_size_i = 10000;
     int malloc_size_j = 700;
 
-    int brk_size_i = 1000000;
+    int brk_size_i = 10000;
     int brk_size_j = 700;
 
     clock_t start_mlk = clock();
